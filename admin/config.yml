@@ -1,24 +1,61 @@
 backend:
-  name: git-gateway
-  branch: main
+  name: github
+  repo: wcinea-dotcom/atlas-plantes-grand-sud-haiti
 
 media_folder: "uploads/plants"
 public_folder: "/uploads/plants"
 
 collections:
   - name: "plantes"
-    label: "Plantes"
+    label: "🌿 Plantes"
     folder: "data"
     create: true
     slug: "{{fields.id_plante}}"
-    extension: "json"
-    format: "json"
     fields:
-      - {label: "ID Plante", name: "id_plante", widget: "string"}
-      - {label: "Nom scientifique", name: "nom_scientifique", widget: "string", required: true}
-      - {label: "Nom créole", name: "nom_creole", widget: "string"}
-      - {label: "Famille", name: "famille_fr", widget: "string"}
+      - {label: "ID Plante", name: "id_plante", widget: "string", required: true}
+      - {label: "N° Famille", name: "no_famille", widget: "string"}
+      - {label: "Famille (Français)", name: "famille_fr", widget: "string"}
+      - {label: "N° Espèce", name: "no_espece", widget: "string"}
+      - {label: "Genre", name: "genre", widget: "string"}
+      - {label: "Espèce", name: "espece", widget: "string"}
+      - {label: "Nom Scientifique", name: "nom_scientifique", widget: "string", required: true}
+      - {label: "Synonymes", name: "synonymes", widget: "string"}
+      - {label: "Nom Français", name: "nom_francais", widget: "string"}
+      - {label: "Nom Créole", name: "nom_creole", widget: "string"}
+      - {label: "Nom Anglais", name: "nom_anglais", widget: "string"}
+      - {label: "Forme", name: "forme", widget: "string"}
+      - {label: "Altitude de développement", name: "altitude_developpement", widget: "string"}
+      - {label: "Saveur", name: "saveur", widget: "string"}
+      - {label: "Type d'usage", name: "type_usage", widget: "string"}
+      - {label: "Parties utilisées", name: "parties_utilisees", widget: "string"}
+      - {label: "Usages ethnobotaniques", name: "usages_ethnobotaniques", widget: "text"}
       - {label: "Usage Haïti", name: "usage_haiti", widget: "text"}
+      - {label: "Usage ailleurs / International", name: "usage_ailleurs_international", widget: "text"}
+      - {label: "Mode de préparation", name: "mode_preparation", widget: "string"}
+      - {label: "Systèmes concernés", name: "systemes_concernes", widget: "string"}
+      - {label: "Maladies", name: "maladies", widget: "string"}
+      - {label: "Profil médicinal", name: "profil_medicinal", widget: "text"}
+      - {label: "Mécanisme d'action", name: "mecanisme_action", widget: "text"}
+      - {label: "Posologie documentée", name: "posologie_documentee", widget: "text"}
       - {label: "Toxique ?", name: "toxique", widget: "boolean"}
+      - {label: "Toxicité et Précautions", name: "toxicite_precautions", widget: "text"}
+      - {label: "Profil nutritionnel", name: "profil_nutritionnel", widget: "text"}
+      - {label: "Métabolites primaires", name: "metabolites_primaires", widget: "text"}
+      - {label: "Micro-éléments", name: "micro_elements", widget: "string"}
+      - {label: "Métabolites secondaires", name: "metabolites_secondaires", widget: "text"}
+      - {label: "Composés secondaires (Défense/Couleur)", name: "composes_secondaires_defense_couleur", widget: "text"}
+      - {label: "Principaux Constituants (5 clés)", name: "principaux_constituants_5_cles", widget: "text"}
+      - {label: "Rôles pour les plantes", name: "roles_pour_plantes", widget: "text"}
+      - {label: "Valeur locale Haïti", name: "valeur_locale_haiti", widget: "text"}
+      - {label: "Valeur internationale", name: "valeur_internationale", widget: "text"}
+      - {label: "Lacunes données recherche", name: "lacunes_donnees_recherche", widget: "text"}
+      - {label: "Potentiel valorisation", name: "potentiel_valorisation", widget: "text"}
+      - {label: "Nombre d'articles", name: "nombre_articles", widget: "string"}
       - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
-      - {label: "Photo de la plante", name: "image", widget: "image", required: false}
+      - {label: "Lien TRAMIL", name: "lien_tramil", widget: "string"}
+      - {label: "Lien Google Scholar", name: "lien_google_scholar", widget: "string"}
+      - {label: "Tags systèmes", name: "tags_systemes", widget: "string"}
+      - {label: "Tags maladies", name: "tags_maladies", widget: "string"}
+      - {label: "Tags substances", name: "tags_substances", widget: "string"}
+      - {label: "Tags usages", name: "tags_usages", widget: "string"}
+      - {label: "Image URL", name: "lien_image", widget: "string"}
