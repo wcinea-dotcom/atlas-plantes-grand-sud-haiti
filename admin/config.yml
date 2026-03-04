@@ -11,6 +11,8 @@ collections:
     folder: "data"
     create: true
     slug: "{{fields.id_plante}}"
+    extension: "json"
+    format: "json"
     fields:
       - {label: "ID Plante", name: "id_plante", widget: "string"}
       - {label: "Nom scientifique", name: "nom_scientifique", widget: "string", required: true}
@@ -19,3 +21,4 @@ collections:
       - {label: "Usage Haïti", name: "usage_haiti", widget: "text"}
       - {label: "Toxique ?", name: "toxique", widget: "boolean"}
       - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
+      - {label: "Photo de la plante", name: "image", widget: "image", required: false}
