@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: TON-USERNAME/atlas-plantes-grand-sud-haiti   # ← Remplace TON-USERNAME par ton vrai nom GitHub
+  repo: wcinea-dotcom/atlas-plantes-grand-sud-haiti   # ← ton repo exact
 
 media_folder: "uploads/plants"
 public_folder: "/uploads/plants"
@@ -19,4 +19,3 @@ collections:
       - {label: "Usage Haïti", name: "usage_haiti", widget: "text"}
       - {label: "Toxique ?", name: "toxique", widget: "boolean"}
       - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
-      - {label: "Lien GBIF", name: "lien_gen", widget: "string"}
