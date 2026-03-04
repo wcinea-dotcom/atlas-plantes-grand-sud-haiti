@@ -1,14 +1,64 @@
-<!doctype html>
-<html>
+
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Atlas Plantes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas des Plantes - Grand-Sud d'Haïti</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: #fff;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 1rem;
+        }
+        h1 {
+            color: #2c5e3b; /* Botanical green */
+            margin-top: 0;
+        }
+        p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .admin-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #2c5e3b;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        .admin-link:hover {
+            background-color: #1e4028;
+        }
+    </style>
 </head>
 <body>
-  <h2 style="text-align:center; margin-top:100px; color:green;">
-    Chargement de l'administration...
-  </h2>
-  <script src="https://unpkg.com/decap-cms@^3.3.0/dist/decap-cms.js"></script>
+    <div class="container">
+        <h1>Atlas des Plantes du Grand-Sud d'Haïti</h1>
+        <p>Bienvenue sur le portail de la flore du Grand-Sud. Ce projet, initié en lien avec les efforts du Jardin Botanique des Cayes, vise à documenter et à promouvoir la richesse de notre biodiversité.</p>
+        <p><em>Le catalogue public est actuellement en cours de développement.</em></p>
+        
+        <a href="/admin/" class="admin-link">Accès Administration</a>
+    </div>
 </body>
 </html>
