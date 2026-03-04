@@ -1,6 +1,6 @@
 backend:
-  name: github
-  repo: wcinea-dotcom/atlas-plantes-grand-sud-haiti
+  name: git-gateway
+  branch: main
 
 media_folder: "uploads/plants"
 public_folder: "/uploads/plants"
@@ -11,6 +11,8 @@ collections:
     folder: "data"
     create: true
     slug: "{{fields.id_plante}}"
+    extension: "json"
+    format: "json"
     fields:
       - {label: "ID Plante", name: "id_plante", widget: "string", required: true}
       - {label: "N° Famille", name: "no_famille", widget: "string"}
@@ -37,7 +39,7 @@ collections:
       - {label: "Profil médicinal", name: "profil_medicinal", widget: "text"}
       - {label: "Mécanisme d'action", name: "mecanisme_action", widget: "text"}
       - {label: "Posologie documentée", name: "posologie_documentee", widget: "text"}
-      - {label: "Toxique ?", name: "toxique", widget: "boolean"}
+      - {label: "Toxique ?", name: "toxique", widget: "string"}
       - {label: "Toxicité et Précautions", name: "toxicite_precautions", widget: "text"}
       - {label: "Profil nutritionnel", name: "profil_nutritionnel", widget: "text"}
       - {label: "Métabolites primaires", name: "metabolites_primaires", widget: "text"}
@@ -58,4 +60,4 @@ collections:
       - {label: "Tags maladies", name: "tags_maladies", widget: "string"}
       - {label: "Tags substances", name: "tags_substances", widget: "string"}
       - {label: "Tags usages", name: "tags_usages", widget: "string"}
-      - {label: "Image URL", name: "lien_image", widget: "string"}
+      - {label: "Image URL", name: "lien_image", widget: "image"}
