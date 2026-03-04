@@ -1,13 +1,13 @@
 backend:
   name: github
-  repo: TON-USERNAME/atlas-plantes-haiti   # ← change TON-USERNAME
+  repo: TON-USERNAME/atlas-plantes-grand-sud-haiti   # ← Remplace TON-USERNAME par ton vrai nom GitHub
 
 media_folder: "uploads/plants"
 public_folder: "/uploads/plants"
 
 collections:
   - name: "plantes"
-    label: "Plantes"
+    label: "🌿 Plantes"
     folder: "data"
     create: true
     slug: "{{fields.id_plante}}"
@@ -19,4 +19,4 @@ collections:
       - {label: "Usage Haïti", name: "usage_haiti", widget: "text"}
       - {label: "Toxique ?", name: "toxique", widget: "boolean"}
       - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
-      # tu peux ajouter tous les autres champs plus tard
+      - {label: "Lien GBIF", name: "lien_gen", widget: "string"}
