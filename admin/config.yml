@@ -1,21 +1,3 @@
 backend:
-  name: github
-  repo: wcinea-dotcom/atlas-plantes-grand-sud-haiti   # ← ton repo exact
-
-media_folder: "uploads/plants"
-public_folder: "/uploads/plants"
-
-collections:
-  - name: "plantes"
-    label: "🌿 Plantes"
-    folder: "data"
-    create: true
-    slug: "{{fields.id_plante}}"
-    fields:
-      - {label: "ID Plante", name: "id_plante", widget: "string"}
-      - {label: "Nom scientifique", name: "nom_scientifique", widget: "string", required: true}
-      - {label: "Nom créole", name: "nom_creole", widget: "string"}
-      - {label: "Famille", name: "famille_fr", widget: "string"}
-      - {label: "Usage Haïti", name: "usage_haiti", widget: "text"}
-      - {label: "Toxique ?", name: "toxique", widget: "boolean"}
-      - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
+  name: git-gateway
+  branch: main
