@@ -1,4 +1,7 @@
 (async function () {
+  // =========================
+  // DOM Elements
+  // =========================
   const status = document.getElementById("status");
   const list = document.getElementById("plants-list");
   const input = document.getElementById("search");
@@ -8,6 +11,9 @@
   const selMaladies = document.getElementById("filter-maladies");
   const btnClear = document.getElementById("clear-filters");
 
+  // =========================
+  // Utils
+  // =========================
   function safe(v) {
     return (v ?? "").toString();
   }
@@ -17,8 +23,8 @@
   }
 
   function splitList(v) {
-    // Supporte: "Digestif | Urinaire" ou "Digestif, Urinaire"
-    const s = safe(v);
+    // Supporte "Digestif | Urinaire" ou "Digestif, Urinaire"
+    const s = safe(v).trim();
     if (!s) return [];
     return s
       .split(/[\|,]/g)
@@ -31,6 +37,7 @@
   }
 
   function setOptions(selectEl, values) {
+    if (!selectEl) return;
     selectEl.innerHTML = "";
     values.forEach((v) => {
       const opt = document.createElement("option");
@@ -41,10 +48,16 @@
   }
 
   function getSelected(selectEl) {
+    if (!selectEl) return [];
     return Array.from(selectEl.selectedOptions).map((o) => o.value);
   }
 
+  // =========================
+  // Render
+  // =========================
   function render(plants) {
+    if (!list) return;
+
     list.innerHTML = "";
 
     plants.forEach((p) => {
@@ -55,68 +68,69 @@
       const nomSci = safe(p.nom_scientifique || "");
       const nomFr = safe(p.nom_francais || "");
       const famille = safe(p.famille_fr || "");
-
       const systemes = safe(p.systemes_concernes || "");
       const maladies = safe(p.maladies || "");
+
+      // ✅ lien fiche plante
+      const link = id
+        ? `<a href="/plante.html?id=${encodeURIComponent(id)}">Voir fiche</a>`
+        : "";
 
       card.innerHTML = `
         <h3>${nomSci || id || "Plante"}</h3>
         ${nomFr ? `<p><b>Nom :</b> ${nomFr}</p>` : ""}
         ${famille ? `<p><b>Famille :</b> ${famille}</p>` : ""}
-        ${systemes ? `<p><b>Systèmes :</b> ${systemes}</p>` : `<p><b>Systèmes :</b> -</p>`}
-        ${maladies ? `<p><b>Maladies :</b> ${maladies}</p>` : `<p><b>Maladies :</b> -</p>`}
+        <p><b>Systèmes :</b> ${systemes || "-"}</p>
+        <p><b>Maladies :</b> ${maladies || "-"}</p>
+        ${link}
       `;
 
       list.appendChild(card);
     });
 
-    status.textContent = `${plants.length} plante(s) affichée(s)`;
+    if (status) status.textContent = `${plants.length} plante(s) affichée(s)`;
   }
 
-  // --- Charger l’index ---
+  // =========================
+  // Load Index
+  // =========================
   let plants = [];
   try {
     const res = await fetch("/data/plants_index.json", { cache: "no-store" });
     if (!res.ok) throw new Error("plants_index.json introuvable");
     plants = await res.json();
   } catch (e) {
+    console.error(e);
     if (status) {
       status.textContent =
-        "Erreur : impossible de charger /data/plants_index.json. Vérifie que le fichier est bien dans GitHub à data/plants_index.json";
+        "Erreur : impossible de charger /data/plants_index.json. Vérifie que GitHub contient : data/plants_index.json";
     }
-    console.error(e);
     return;
   }
 
-  // --- Construire les options des filtres depuis l’index ---
-  if (selFamille && selSystemes && selMaladies) {
-    const familles = uniqueSorted(
-      plants.map((p) => safe(p.famille_fr)).filter(Boolean)
-    );
+  // =========================
+  // Build filter options
+  // =========================
+  const familles = uniqueSorted(plants.map((p) => safe(p.famille_fr)).filter(Boolean));
+  const systemesOpts = uniqueSorted(plants.flatMap((p) => splitList(p.systemes_concernes)));
+  const maladiesOpts = uniqueSorted(plants.flatMap((p) => splitList(p.maladies)));
 
-    const systemes = uniqueSorted(
-      plants.flatMap((p) => splitList(p.systemes_concernes))
-    );
+  setOptions(selFamille, familles);
+  setOptions(selSystemes, systemesOpts);
+  setOptions(selMaladies, maladiesOpts);
 
-    const maladies = uniqueSorted(
-      plants.flatMap((p) => splitList(p.maladies))
-    );
-
-    setOptions(selFamille, familles);
-    setOptions(selSystemes, systemes);
-    setOptions(selMaladies, maladies);
-  }
-
-  // --- Filtrer ---
+  // =========================
+  // Filtering logic
+  // =========================
   function applyFilters() {
     const term = normalize(input ? input.value : "");
 
-    const selectedFamilles = selFamille ? getSelected(selFamille) : [];
-    const selectedSystemes = selSystemes ? getSelected(selSystemes) : [];
-    const selectedMaladies = selMaladies ? getSelected(selMaladies) : [];
+    const selectedFamilles = getSelected(selFamille);
+    const selectedSystemes = getSelected(selSystemes);
+    const selectedMaladies = getSelected(selMaladies);
 
     const filtered = plants.filter((p) => {
-      // 1) Recherche texte globale
+      // A) Recherche texte
       if (term) {
         const blob = [
           p.id,
@@ -141,19 +155,19 @@
         if (!blob.includes(term)) return false;
       }
 
-      // 2) Famille (si au moins 1 sélectionnée)
+      // B) Famille (ET)
       if (selectedFamilles.length > 0) {
         if (!selectedFamilles.includes(safe(p.famille_fr))) return false;
       }
 
-      // 3) Systèmes (OU entre les systèmes sélectionnés)
+      // C) Systèmes (OU)
       if (selectedSystemes.length > 0) {
         const pSys = splitList(p.systemes_concernes);
         const ok = selectedSystemes.some((s) => pSys.includes(s));
         if (!ok) return false;
       }
 
-      // 4) Maladies (OU entre les maladies sélectionnées)
+      // D) Maladies (OU)
       if (selectedMaladies.length > 0) {
         const pMal = splitList(p.maladies);
         const ok = selectedMaladies.some((m) => pMal.includes(m));
@@ -166,7 +180,9 @@
     render(filtered);
   }
 
+  // =========================
   // Events
+  // =========================
   if (input) input.addEventListener("input", applyFilters);
   if (selFamille) selFamille.addEventListener("change", applyFilters);
   if (selSystemes) selSystemes.addEventListener("change", applyFilters);
@@ -183,6 +199,8 @@
     });
   }
 
-  // Premier rendu
+  // =========================
+  // First render
+  // =========================
   render(plants);
 })();
