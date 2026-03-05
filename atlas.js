@@ -33,7 +33,9 @@
   }
 
   function uniqueSorted(arr) {
-    return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b));
+    return Array.from(new Set(arr)).sort((a, b) =>
+      a.localeCompare(b, "fr", { sensitivity: "base" })
+    );
   }
 
   function setOptions(selectEl, values) {
@@ -55,16 +57,18 @@
   // =========================
   // Render
   // =========================
-  function render(plants) {
+  function render(plantsToRender) {
     if (!list) return;
 
     list.innerHTML = "";
 
-    plants.forEach((p) => {
+    plantsToRender.forEach((p) => {
       const card = document.createElement("div");
       card.className = "plant-card";
 
-      const id = safe(p.id || p.id_plante || "");
+      // ✅ IMPORTANT : l'id doit être en minuscules pour matcher tes fichiers : plt-0002.json
+      const id = safe(p.id || p.id_plante || "").toLowerCase();
+
       const nomSci = safe(p.nom_scientifique || "");
       const nomFr = safe(p.nom_francais || "");
       const famille = safe(p.famille_fr || "");
@@ -88,7 +92,7 @@
       list.appendChild(card);
     });
 
-    if (status) status.textContent = `${plants.length} plante(s) affichée(s)`;
+    if (status) status.textContent = `${plantsToRender.length} plante(s) affichée(s)`;
   }
 
   // =========================
@@ -111,9 +115,17 @@
   // =========================
   // Build filter options
   // =========================
-  const familles = uniqueSorted(plants.map((p) => safe(p.famille_fr)).filter(Boolean));
-  const systemesOpts = uniqueSorted(plants.flatMap((p) => splitList(p.systemes_concernes)));
-  const maladiesOpts = uniqueSorted(plants.flatMap((p) => splitList(p.maladies)));
+  const familles = uniqueSorted(
+    plants.map((p) => safe(p.famille_fr)).filter(Boolean)
+  );
+
+  const systemesOpts = uniqueSorted(
+    plants.flatMap((p) => splitList(p.systemes_concernes))
+  );
+
+  const maladiesOpts = uniqueSorted(
+    plants.flatMap((p) => splitList(p.maladies))
+  );
 
   setOptions(selFamille, familles);
   setOptions(selSystemes, systemesOpts);
@@ -130,7 +142,7 @@
     const selectedMaladies = getSelected(selMaladies);
 
     const filtered = plants.filter((p) => {
-      // A) Recherche texte
+      // A) Recherche texte globale
       if (term) {
         const blob = [
           p.id,
