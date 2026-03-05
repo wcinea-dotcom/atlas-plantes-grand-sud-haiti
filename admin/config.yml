@@ -53,11 +53,18 @@ collections:
       - {label: "Lacunes données recherche", name: "lacunes_donnees_recherche", widget: "text"}
       - {label: "Potentiel valorisation", name: "potentiel_valorisation", widget: "text"}
       - {label: "Nombre d'articles", name: "nombre_articles", widget: "string"}
-      - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
-      - {label: "Lien TRAMIL", name: "lien_tramil", widget: "string"}
-      - {label: "Lien Google Scholar", name: "lien_google_scholar", widget: "string"}
+      - {label: "Mode de reproduction", name: "mode_reproduction", widget: "string"}
+      - {label: "Indice d'abondance", name: "indice_abondance", widget: "string"}
+      - {label: "Statut (Origine)", name: "statut_origine", widget: "string"}
+      - {label: "Besoin de Conservation / Action", name: "besoin_conservation_action", widget: "string"}
       - {label: "Tags systèmes", name: "tags_systemes", widget: "string"}
       - {label: "Tags maladies", name: "tags_maladies", widget: "string"}
       - {label: "Tags substances", name: "tags_substances", widget: "string"}
       - {label: "Tags usages", name: "tags_usages", widget: "string"}
+      - {label: "Lien PubMed", name: "lien_pubmed", widget: "string"}
+      - {label: "Lien TRAMIL", name: "lien_tramil", widget: "string"}
+      - {label: "Lien Gén.", name: "lien_gen", widget: "string"}
+      - {label: "References & Liens 1", name: "references_liens_1", widget: "string"}
+      - {label: "References & Liens 2", name: "references_liens_2", widget: "string"}
+      - {label: "Lien", name: "lien", widget: "string"}
       - {label: "Image URL", name: "lien_image", widget: "image"}
