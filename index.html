@@ -1,37 +1,166 @@
-Index.html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas des Plantes - Grand-Sud d'Haïti</title>
-    <style>
-        body { font-family: system-ui, sans-serif; line-height: 1.6; margin: 0; background-color: #f4f7f6; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
-        .container { background: #fff; padding: 3rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); max-width: 600px; margin: 1rem; }
-        h1 { color: #2c5e3b; margin-top: 0; }
-        .admin-link { display: inline-block; margin-top: 2rem; padding: 0.75rem 1.5rem; background-color: #2c5e3b; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
-    </style>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Atlas des Plantes du Grand-Sud d'Haïti</h1>
-        <p>Bienvenue sur le portail de la flore du Grand-Sud. Ce projet, initié en lien avec les efforts du Jardin Botanique des Cayes, vise à documenter et à promouvoir la richesse de notre biodiversité.</p>
-        <p><em>Le catalogue public est actuellement en cours de développement.</em></p>
-        <a href="/admin/" class="admin-link">Accès Administration</a>
-    </div>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas des Plantes - Grand-Sud d'Haïti</title>
 
-    <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-    </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      background-color: #f4f7f6;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      background: #fff;
+      padding: 3rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      max-width: 900px;
+      width: 100%;
+      margin: 1rem;
+    }
+
+    h1 { color: #2c5e3b; margin-top: 0; }
+
+    .admin-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #2c5e3b;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    /* --- Catalogue public --- */
+    .catalogue {
+      margin-top: 2rem;
+      text-align: left;
+    }
+
+    .catalogue h2 {
+      text-align: center;
+      color: #2c5e3b;
+      margin-bottom: 1rem;
+    }
+
+    #search {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    #search:focus {
+      border-color: #2c5e3b;
+    }
+
+    #status {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: #555;
+      text-align: center;
+    }
+
+    #plants-list {
+      margin-top: 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 0.9rem;
+    }
+
+    .plant-card {
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 1rem;
+      background: #fafafa;
+    }
+
+    .plant-card h3 {
+      margin: 0 0 0.35rem 0;
+      font-size: 1.05rem;
+      color: #1f3b28;
+    }
+
+    .plant-card p {
+      margin: 0.2rem 0;
+      font-size: 0.95rem;
+      color: #444;
+    }
+
+    .plant-card a {
+      display: inline-block;
+      margin-top: 0.6rem;
+      color: #2c5e3b;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .plant-card a:hover { text-decoration: underline; }
+  </style>
+
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Atlas des Plantes du Grand-Sud d'Haïti</h1>
+
+    <p>
+      Bienvenue sur le portail de la flore du Grand-Sud. Ce projet, initié en lien avec
+      les efforts du Jardin Botanique des Cayes, vise à documenter et à promouvoir la richesse
+      de notre biodiversité.
+    </p>
+
+    <a href="/admin/" class="admin-link">Accès Administration</a>
+
+    <!-- ✅ Catalogue public -->
+    <div class="catalogue">
+      <h2>Catalogue public</h2>
+
+      <input
+        type="text"
+        id="search"
+        placeholder="Rechercher : nom scientifique, nom français, famille, maladie…"
+        autocomplete="off"
+      />
+
+      <div id="status">Chargement des plantes…</div>
+
+      <div id="plants-list"></div>
+    </div>
+  </div>
+
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
+  </script>
+
+  <!-- ✅ Le moteur -->
+  <script src="atlas.js"></script>
 </body>
 </html>
+
 
