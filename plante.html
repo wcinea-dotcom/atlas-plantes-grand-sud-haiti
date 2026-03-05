@@ -38,9 +38,7 @@
     }
 
     @media (min-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      .grid { grid-template-columns: 1fr 1fr; }
     }
 
     .card {
@@ -89,6 +87,16 @@
       padding: 0.15rem 0.35rem;
       border-radius: 6px;
     }
+
+    .pill {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border: 1px solid #e6e6e6;
+      border-radius: 999px;
+      background: #fff;
+      margin: 0.15rem 0.25rem 0 0;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 
@@ -109,6 +117,9 @@
   </div>
 
   <script>
+    // =========================
+    // Utils robustes
+    // =========================
     function getParam(name) {
       const u = new URL(window.location.href);
       return u.searchParams.get(name);
@@ -124,17 +135,31 @@
       return s.split(/[\|,]/g).map(x => x.trim()).filter(Boolean);
     }
 
+    function isHttpUrl(s) {
+      return /^https?:\/\//i.test(s);
+    }
+
+    function linkify(value) {
+      const v = safe(value);
+      if (!v) return "";
+      // Si c'est un lien http(s), rendre cliquable
+      if (isHttpUrl(v)) {
+        return `<a href="${v}" target="_blank" rel="noopener noreferrer">${v}</a>`;
+      }
+      return v;
+    }
+
     function fieldRow(label, value) {
       const v = safe(value);
       if (!v) return "";
-      return `<div class="row"><span class="label">${label} :</span> ${v}</div>`;
+      return `<div class="row"><span class="label">${label} :</span> ${linkify(v)}</div>`;
     }
 
     function fieldList(label, value) {
       const items = Array.isArray(value) ? value : splitList(value);
       if (!items.length) return "";
-      const li = items.map(x => `<li>${x}</li>`).join("");
-      return `<div class="row"><div class="label">${label} :</div><ul>${li}</ul></div>`;
+      const pills = items.map(x => `<span class="pill">${safe(x)}</span>`).join("");
+      return `<div class="row"><div class="label">${label} :</div>${pills}</div>`;
     }
 
     function card(title, innerHtml) {
@@ -142,8 +167,13 @@
       return `<section class="card"><h2>${title}</h2>${body}</section>`;
     }
 
+    // =========================
+    // Main
+    // =========================
     (async function() {
-      const id = getParam("id");
+      // ✅ IMPORTANT : forcer l'id en minuscules (Netlify est sensible à la casse)
+      const id = (getParam("id") || "").trim().toLowerCase();
+
       const statusEl = document.getElementById("status");
       const titleEl = document.getElementById("title");
       const subtitleEl = document.getElementById("subtitle");
@@ -158,14 +188,20 @@
 
       plantIdEl.textContent = `ID : ${id}`;
 
+      // Charger JSON plante
+      const url = `/data/plants/${encodeURIComponent(id)}.json`;
       let plant;
+
       try {
-        const res = await fetch(`/data/plants/${id}.json`, { cache: "no-store" });
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("Fichier plante introuvable");
         plant = await res.json();
       } catch (e) {
-        statusEl.textContent = `Erreur : impossible de charger /data/plants/${id}.json`;
         console.error(e);
+        statusEl.innerHTML = `
+          Erreur : impossible de charger <code>${url}</code><br>
+          Vérifie que le fichier existe dans GitHub : <code>data/plants/${id}.json</code>
+        `;
         return;
       }
 
@@ -182,18 +218,19 @@
 
       // Image (si dispo)
       const lienImage = safe(plant.lien_image || plant.image || "");
-      if (lienImage) {
+      if (lienImage && (isHttpUrl(lienImage) || lienImage.startsWith("/"))) {
         imgEl.src = lienImage;
         imgEl.style.display = "block";
       }
 
-      // Sections (tu peux ajuster ces champs selon ton JSON final)
+      // Sections
       const taxonomie = [
         fieldRow("Famille", plant.famille_fr),
         fieldRow("Genre", plant.genre),
         fieldRow("Espèce", plant.espece),
         fieldRow("Nom scientifique", plant.nom_scientifique),
         fieldRow("Synonymes", plant.synonymes),
+        fieldRow("Nom français", plant.nom_francais),
         fieldRow("Nom créole", plant.nom_creole),
         fieldRow("Nom anglais", plant.nom_anglais),
       ].join("");
@@ -253,6 +290,7 @@
         fieldRow("Lien général", plant.lien_gen),
         fieldRow("Références 1", plant.references_liens_1 || plant.references_liens),
         fieldRow("Références 2", plant.references_liens_2),
+        fieldRow("Lien principal", plant.lien),
       ].join("");
 
       const economie = [
