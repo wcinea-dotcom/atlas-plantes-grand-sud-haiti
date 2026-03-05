@@ -1,35 +1,68 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas des Plantes - Grand-Sud d'Haïti</title>
-    <style>
-        body { font-family: system-ui, sans-serif; line-height: 1.6; margin: 0; background-color: #f4f7f6; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
-        .container { background: #fff; padding: 3rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); max-width: 600px; margin: 1rem; }
-        h1 { color: #2c5e3b; margin-top: 0; }
-        .admin-link { display: inline-block; margin-top: 2rem; padding: 0.75rem 1.5rem; background-color: #2c5e3b; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
-    </style>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas des Plantes du Grand-Sud d'Haïti</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f8f0; padding: 20px; text-align: center; }
+    h1 { color: #006400; }
+    #search { width: 300px; padding: 10px; margin-bottom: 20px; }
+    #results { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .plante-card { background: white; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+    .plante-card h2 { color: #228B22; }
+    .admin-link { background: #006400; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }
+    .admin-link:hover { background: #004d00; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Atlas des Plantes du Grand-Sud d'Haïti</h1>
-        <p>Bienvenue sur le portail de la flore du Grand-Sud. Ce projet, initié en lien avec les efforts du Jardin Botanique des Cayes, vise à documenter et à promouvoir la richesse de notre biodiversité.</p>
-        <p><em>Le catalogue public est actuellement en cours de développement.</em></p>
-        <a href="/admin/" class="admin-link">Accès Administration</a>
-    </div>
+  <h1>🌿 Atlas des Plantes du Grand-Sud d'Haïti</h1>
+  <p>Bienvenue ! Cherchez par maladie, système, plante ou famille (ex. "hypertension", "digestif", "Pèpèt", "Acanthacées").</p>
+  <input type="text" id="search" placeholder="Rechercher...">
+  <div id="results"></div>
+  <a href="/admin" class="admin-link">Accès Administration</a>
 
-    <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", user => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
+  <script>
+    // Charge les plantes
+    async function chargerPlantes() {
+      const response = await fetch('/data/plants_index.json');  # Si tu as un index, sinon change pour charger tous les JSON
+      const plantes = await response.json();
+      return plantes;
+    }
+
+    async function init() {
+      const plantes = await chargerPlantes();
+      const searchInput = document.getElementById('search');
+      const resultsDiv = document.getElementById('results');
+
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = plantes.filter(plante => 
+          (plante.maladies && plante.maladies.toLowerCase().includes(query)) ||
+          (plante.systemes_concernes && plante.systemes_concernes.toLowerCase().includes(query)) ||
+          (plante.nom_creole && plante.nom_creole.toLowerCase().includes(query)) ||
+          (plante.famille_fr && plante.famille_fr.toLowerCase().includes(query)) ||
+          (plante.nom_scientifique && plante.nom_scientifique.toLowerCase().includes(query))
+        );
+
+        resultsDiv.innerHTML = '';
+        filtered.forEach(plante => {
+          const card = document.createElement('div');
+          card.className = 'plante-card';
+          card.innerHTML = `
+            <h2>${plante.nom_creole} (${plante.nom_scientifique})</h2>
+            <p><strong>Famille : </strong>${plante.famille_fr || 'N/A'}</p>
+            <p><strong>Maladies : </strong>${plante.maladies || 'N/A'}</p>
+            <p><strong>Systèmes : </strong>${plante.systemes_concernes || 'N/A'}</p>
+            <p><strong>Usage Haïti : </strong>${plante.usage_haiti || 'N/A'}</p>
+            <a href="${plante.lien_pubmed}" target="_blank">Voir sur PubMed</a>
+          `;
+          resultsDiv.appendChild(card);
         });
-      }
-    </script>
+      });
+    }
+
+    init();
+  </script>
 </body>
 </html>
