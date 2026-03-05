@@ -54,6 +54,13 @@
     return Array.from(selectEl.selectedOptions).map((o) => o.value);
   }
 
+  // ✅ Normalise l’ID pour matcher tes fichiers : data/plt-0001.json
+  function normalizeId(p) {
+    return safe(p.id || p.id_plante || "")
+      .trim()
+      .toLowerCase();
+  }
+
   // =========================
   // Render
   // =========================
@@ -66,8 +73,7 @@
       const card = document.createElement("div");
       card.className = "plant-card";
 
-      // ✅ IMPORTANT : l'id doit être en minuscules pour matcher tes fichiers : plt-0002.json
-      const id = safe(p.id || p.id_plante || "").toLowerCase();
+      const id = normalizeId(p);
 
       const nomSci = safe(p.nom_scientifique || "");
       const nomFr = safe(p.nom_francais || "");
@@ -75,7 +81,7 @@
       const systemes = safe(p.systemes_concernes || "");
       const maladies = safe(p.maladies || "");
 
-      // ✅ lien fiche plante
+      // ✅ lien fiche plante (id doit correspondre au fichier JSON)
       const link = id
         ? `<a href="/plante.html?id=${encodeURIComponent(id)}">Voir fiche</a>`
         : "";
