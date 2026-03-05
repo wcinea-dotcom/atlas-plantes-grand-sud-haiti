@@ -142,7 +142,6 @@
     function linkify(value) {
       const v = safe(value);
       if (!v) return "";
-      // Si c'est un lien http(s), rendre cliquable
       if (isHttpUrl(v)) {
         return `<a href="${v}" target="_blank" rel="noopener noreferrer">${v}</a>`;
       }
@@ -171,7 +170,7 @@
     // Main
     // =========================
     (async function() {
-      // ✅ IMPORTANT : forcer l'id en minuscules (Netlify est sensible à la casse)
+      // ✅ IMPORTANT : forcer l'id en minuscules
       const id = (getParam("id") || "").trim().toLowerCase();
 
       const statusEl = document.getElementById("status");
@@ -188,8 +187,10 @@
 
       plantIdEl.textContent = `ID : ${id}`;
 
-      // Charger JSON plante
-      const url = `/data/plants/${encodeURIComponent(id)}.json`;
+      // ✅✅✅ FIX IMPORTANT :
+      // Tes fichiers sont dans /data/plt-0001.json (pas /data/plants/...)
+      const url = `/data/${encodeURIComponent(id)}.json`;
+
       let plant;
 
       try {
@@ -200,7 +201,7 @@
         console.error(e);
         statusEl.innerHTML = `
           Erreur : impossible de charger <code>${url}</code><br>
-          Vérifie que le fichier existe dans GitHub : <code>data/plants/${id}.json</code>
+          Vérifie que le fichier existe dans GitHub : <code>data/${id}.json</code>
         `;
         return;
       }
