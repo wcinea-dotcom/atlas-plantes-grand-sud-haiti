@@ -6,6 +6,9 @@
   <title>Atlas des Plantes - Grand-Sud d'Haïti</title>
 
   <style>
+    /* =========================
+       Base / Layout
+    ========================= */
     body {
       font-family: system-ui, sans-serif;
       line-height: 1.6;
@@ -31,7 +34,10 @@
       margin: 1rem;
     }
 
-    h1 { color: #2c5e3b; margin-top: 0; }
+    h1 {
+      color: #2c5e3b;
+      margin-top: 0;
+    }
 
     .admin-link {
       display: inline-block;
@@ -44,7 +50,9 @@
       font-weight: bold;
     }
 
-    /* --- Catalogue public --- */
+    /* =========================
+       Catalogue public
+    ========================= */
     .catalogue {
       margin-top: 2rem;
       text-align: left;
@@ -56,8 +64,55 @@
       margin-bottom: 1rem;
     }
 
+    /* --- Filtres --- */
+    .filters {
+      margin-top: 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
+    }
+
+    .filter label {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .filter select {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.5rem;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    .filter small {
+      display: block;
+      margin-top: 0.35rem;
+      color: #666;
+    }
+
+    .filters-actions {
+      margin-top: 0.8rem;
+      text-align: center;
+    }
+
+    #clear-filters {
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    #clear-filters:hover {
+      border-color: #2c5e3b;
+    }
+
+    /* --- Recherche --- */
     #search {
       width: 100%;
+      margin-top: 1rem;
       padding: 0.9rem 1rem;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -70,6 +125,7 @@
       border-color: #2c5e3b;
     }
 
+    /* --- Status --- */
     #status {
       margin-top: 0.75rem;
       font-size: 0.95rem;
@@ -77,6 +133,7 @@
       text-align: center;
     }
 
+    /* --- Cartes --- */
     #plants-list {
       margin-top: 1.2rem;
       display: grid;
@@ -111,9 +168,12 @@
       text-decoration: none;
     }
 
-    .plant-card a:hover { text-decoration: underline; }
+    .plant-card a:hover {
+      text-decoration: underline;
+    }
   </style>
 
+  <!-- Netlify Identity -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 
@@ -133,6 +193,32 @@
     <div class="catalogue">
       <h2>Catalogue public</h2>
 
+      <!-- ✅ Filtres -->
+      <div class="filters">
+        <div class="filter">
+          <label for="filter-famille"><b>Famille</b></label>
+          <select id="filter-famille" multiple size="6"></select>
+          <small>Ctrl/Cmd pour multi-sélection</small>
+        </div>
+
+        <div class="filter">
+          <label for="filter-systemes"><b>Systèmes</b></label>
+          <select id="filter-systemes" multiple size="6"></select>
+          <small>Ctrl/Cmd pour multi-sélection</small>
+        </div>
+
+        <div class="filter">
+          <label for="filter-maladies"><b>Maladies</b></label>
+          <select id="filter-maladies" multiple size="6"></select>
+          <small>Ctrl/Cmd pour multi-sélection</small>
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <button id="clear-filters" type="button">Réinitialiser</button>
+      </div>
+
+      <!-- ✅ Recherche texte -->
       <input
         type="text"
         id="search"
@@ -141,11 +227,11 @@
       />
 
       <div id="status">Chargement des plantes…</div>
-
       <div id="plants-list"></div>
     </div>
   </div>
 
+  <!-- Netlify Identity redirect -->
   <script>
     if (window.netlifyIdentity) {
       window.netlifyIdentity.on("init", user => {
@@ -158,9 +244,8 @@
     }
   </script>
 
-  <!-- ✅ Le moteur -->
+  <!-- ✅ Moteur catalogue (IMPORTANT : doit exister dans le repo) -->
   <script src="atlas.js"></script>
 </body>
 </html>
-
 
