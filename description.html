@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Description de la plante</title>
+  <style>
+    body{font-family:system-ui,sans-serif;line-height:1.7;margin:0;background:#f4f7f6;color:#333;padding:2rem 1rem;}
+    .container{max-width:980px;margin:0 auto;background:#fff;border-radius:10px;padding:2rem;box-shadow:0 4px 12px rgba(0,0,0,0.06);}
+    a{color:#2c5e3b;text-decoration:none;font-weight:600}
+    a:hover{text-decoration:underline}
+    h1{margin:0;color:#1f3b28}
+    .subtitle{color:#555;margin-top:.35rem}
+    .status{text-align:center;color:#555;padding:1rem}
+    .section{margin-top:1.5rem}
+    .section h2{color:#2c5e3b;margin:0 0 .6rem 0;font-size:1.05rem}
+    .p{margin:0 0 1rem 0}
+    .muted{color:#666}
+    code{background:#f0f2f1;padding:.15rem .35rem;border-radius:6px}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="/" style="display:inline-block;margin-bottom:1rem;">← Retour au catalogue</a>
+
+    <div id="status" class="status">Chargement…</div>
+
+    <h1 id="title" style="display:none;"></h1>
+    <div id="subtitle" class="subtitle" style="display:none;"></div>
+
+    <div id="content" style="display:none;"></div>
+  </div>
+
+  <script>
+    function getParam(name){ return new URL(window.location.href).searchParams.get(name); }
+    function safe(v){ return (v ?? "").toString().trim(); }
+
+    function getLangFromPath(){
+      const p = window.location.pathname;
+      if (p.startsWith("/en/")) return "en";
+      if (p.startsWith("/ht/")) return "ht";
+      return "fr";
+    }
+
+    function toParagraphs(text){
+      const t = safe(text);
+      if (!t) return "";
+      // Découpe par lignes vides (paragraphes)
+      const parts = t.split(/\n\s*\n/g).map(s => s.trim()).filter(Boolean);
+      return parts.map(p => `<p class="p">${p.replace(/\n/g, "<br>")}</p>`).join("");
+    }
+
+    (async function(){
+      const statusEl = document.getElementById("status");
+      const titleEl = document.getElementById("title");
+      const subtitleEl = document.getElementById("subtitle");
+      const contentEl = document.getElementById("content");
+
+      const id = safe(getParam("id")).toLowerCase();
+      if (!id){
+        statusEl.innerHTML = `Erreur : paramètre <code>?id=</code> manquant. Exemple : <code>description.html?id=plt-0001</code>`;
+        return;
+      }
+
+      const url = `/data/plants/${encodeURIComponent(id)}.json`;
+      let plant;
+
+      try{
+        const res = await fetch(url, { cache:"no-store" });
+        if (!res.ok) throw new Error("Fichier plante introuvable");
+        plant = await res.json();
+      } catch(e){
+        console.error(e);
+        statusEl.innerHTML = `Erreur : impossible de charger <code>${url}</code>`;
+        return;
+      }
+
+      const LANG = getLangFromPath();
+      const nomSci = safe(plant.nom_scientifique) || id;
+
+      const nomLocal =
+        LANG === "en" ? safe(plant.nom_anglais) :
+        LANG === "ht" ? safe(plant.nom_creole) :
+        safe(plant.nom_francais);
+
+      // Choisir les champs de description selon la langue
+      const desc =
+        LANG === "en" ? safe(plant.description_en || plant.description_fr) :
+        LANG === "ht" ? safe(plant.description_ht || plant.description_fr) :
+        safe(plant.description_fr);
+
+      const botanique =
+        LANG === "en" ? safe(plant.botanique_en || "") :
+        LANG === "ht" ? safe(plant.botanique_ht || "") :
+        safe(plant.botanique_fr || "");
+
+      const ecologie =
+        LANG === "en" ? safe(plant.ecologie_en || "") :
+        LANG === "ht" ? safe(plant.ecologie_ht || "") :
+        safe(plant.ecologie_fr || "");
+
+      const usages =
+        LANG === "en" ? safe(plant.usages_en || "") :
+        LANG === "ht" ? safe(plant.usages_ht || "") :
+        safe(plant.usages_fr || "");
+
+      titleEl.textContent = nomSci;
+      subtitleEl.textContent = [nomLocal ? `Nom : ${nomLocal}` : "", `ID : ${id}`].filter(Boolean).join(" • ");
+
+      let html = "";
+
+      if (desc){
+        html += `<div class="section"><h2>Description (paragraphes)</h2>${toParagraphs(desc)}</div>`;
+      }
+
+      if (botanique){
+        html += `<div class="section"><h2>Description botanique</h2>${toParagraphs(botanique)}</div>`;
+      }
+
+      if (ecologie){
+        html += `<div class="section"><h2>Écologie & habitat</h2>${toParagraphs(ecologie)}</div>`;
+      }
+
+      if (usages){
+        html += `<div class="section"><h2>Usages & préparation</h2>${toParagraphs(usages)}</div>`;
+      }
+
+      if (!html){
+        html = `<div class="muted">Aucune description en paragraphes n’est encore disponible pour cette plante.</div>`;
+      }
+
+      // Afficher
+      statusEl.style.display = "none";
+      titleEl.style.display = "block";
+      subtitleEl.style.display = "block";
+      contentEl.style.display = "block";
+      contentEl.innerHTML = html;
+    })();
+  </script>
+</body>
+</html>
