@@ -23,7 +23,6 @@
   }
 
   function splitList(v) {
-    // Supporte "Digestif | Urinaire" ou "Digestif, Urinaire"
     const s = safe(v).trim();
     if (!s) return [];
     return s
@@ -54,7 +53,6 @@
     return Array.from(selectEl.selectedOptions).map((o) => o.value);
   }
 
-  // ✅ Normalise l’ID pour matcher tes fichiers : data/plt-0001.json
   function normalizeId(p) {
     return safe(p.id || p.id_plante || "")
       .trim()
@@ -81,9 +79,13 @@
       const systemes = safe(p.systemes_concernes || "");
       const maladies = safe(p.maladies || "");
 
-      // ✅ lien fiche plante (id doit correspondre au fichier JSON)
-      const link = id
+      // ✅ Liens
+      const ficheLink = id
         ? `<a href="/plante.html?id=${encodeURIComponent(id)}">Voir fiche</a>`
+        : "";
+
+      const descLink = id
+        ? `<a href="/description.html?id=${encodeURIComponent(id)}">Lire la description</a>`
         : "";
 
       card.innerHTML = `
@@ -92,13 +94,18 @@
         ${famille ? `<p><b>Famille :</b> ${famille}</p>` : ""}
         <p><b>Systèmes :</b> ${systemes || "-"}</p>
         <p><b>Maladies :</b> ${maladies || "-"}</p>
-        ${link}
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:0.7rem;">
+          ${ficheLink}
+          ${descLink}
+        </div>
       `;
 
       list.appendChild(card);
     });
 
-    if (status) status.textContent = `${plantsToRender.length} plante(s) affichée(s)`;
+    if (status) {
+      status.textContent = `${plantsToRender.length} plante(s) affichée(s)`;
+    }
   }
 
   // =========================
@@ -211,7 +218,9 @@
       if (input) input.value = "";
       [selFamille, selSystemes, selMaladies].forEach((sel) => {
         if (!sel) return;
-        Array.from(sel.options).forEach((o) => (o.selected = false));
+        Array.from(sel.options).forEach((o) => {
+          o.selected = false;
+        });
       });
       applyFilters();
     });
