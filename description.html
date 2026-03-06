@@ -4,138 +4,245 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Description de la plante</title>
+
   <style>
-    body{font-family:system-ui,sans-serif;line-height:1.7;margin:0;background:#f4f7f6;color:#333;padding:2rem 1rem;}
-    .container{max-width:980px;margin:0 auto;background:#fff;border-radius:10px;padding:2rem;box-shadow:0 4px 12px rgba(0,0,0,0.06);}
-    a{color:#2c5e3b;text-decoration:none;font-weight:600}
-    a:hover{text-decoration:underline}
-    h1{margin:0;color:#1f3b28}
-    .subtitle{color:#555;margin-top:.35rem}
-    .status{text-align:center;color:#555;padding:1rem}
-    .section{margin-top:1.5rem}
-    .section h2{color:#2c5e3b;margin:0 0 .6rem 0;font-size:1.05rem}
-    .p{margin:0 0 1rem 0}
-    .muted{color:#666}
-    code{background:#f0f2f1;padding:.15rem .35rem;border-radius:6px}
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.7;
+      margin: 0;
+      background: #f4f7f6;
+      color: #333;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    a {
+      color: #2c5e3b;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      margin: 0;
+      color: #1f3b28;
+    }
+
+    .subtitle {
+      color: #555;
+      margin-top: 0.35rem;
+    }
+
+    .status {
+      text-align: center;
+      color: #555;
+      padding: 1rem;
+    }
+
+    .section {
+      margin-top: 1.8rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #eee;
+    }
+
+    .section h2 {
+      color: #2c5e3b;
+      margin: 0 0 0.8rem 0;
+      font-size: 1.1rem;
+    }
+
+    .paragraph {
+      margin: 0 0 1rem 0;
+      text-align: justify;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    code {
+      background: #f0f2f1;
+      padding: 0.15rem 0.35rem;
+      border-radius: 6px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .meta-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+
+    .meta-box p {
+      margin: 0.35rem 0;
+    }
+
+    img.plant {
+      width: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <a href="/" style="display:inline-block;margin-bottom:1rem;">← Retour au catalogue</a>
+    <div class="topbar">
+      <a href="/">← Retour au catalogue</a>
+      <div class="muted" id="plant-id"></div>
+    </div>
 
     <div id="status" class="status">Chargement…</div>
 
     <h1 id="title" style="display:none;"></h1>
     <div id="subtitle" class="subtitle" style="display:none;"></div>
 
+    <img id="image" class="plant" style="display:none;" alt="Image de la plante" />
+
+    <div id="meta" class="meta-box" style="display:none;"></div>
     <div id="content" style="display:none;"></div>
   </div>
 
   <script>
-    function getParam(name){ return new URL(window.location.href).searchParams.get(name); }
-    function safe(v){ return (v ?? "").toString().trim(); }
-
-    function getLangFromPath(){
-      const p = window.location.pathname;
-      if (p.startsWith("/en/")) return "en";
-      if (p.startsWith("/ht/")) return "ht";
-      return "fr";
+    function getParam(name) {
+      const u = new URL(window.location.href);
+      return u.searchParams.get(name);
     }
 
-    function toParagraphs(text){
+    function safe(v) {
+      return (v ?? "").toString().trim();
+    }
+
+    function isHttpUrl(s) {
+      return /^https?:\/\//i.test(s);
+    }
+
+    function toParagraphs(text) {
       const t = safe(text);
       if (!t) return "";
-      // Découpe par lignes vides (paragraphes)
-      const parts = t.split(/\n\s*\n/g).map(s => s.trim()).filter(Boolean);
-      return parts.map(p => `<p class="p">${p.replace(/\n/g, "<br>")}</p>`).join("");
+
+      const parts = t
+        .split(/\n\s*\n/g)
+        .map((p) => p.trim())
+        .filter(Boolean);
+
+      return parts
+        .map((p) => `<p class="paragraph">${p.replace(/\n/g, "<br>")}</p>`)
+        .join("");
     }
 
-    (async function(){
+    function section(title, text) {
+      const html = toParagraphs(text);
+      if (!html) return "";
+      return `
+        <section class="section">
+          <h2>${title}</h2>
+          ${html}
+        </section>
+      `;
+    }
+
+    (async function () {
+      const id = (getParam("id") || "").trim().toLowerCase();
+
       const statusEl = document.getElementById("status");
       const titleEl = document.getElementById("title");
       const subtitleEl = document.getElementById("subtitle");
       const contentEl = document.getElementById("content");
+      const metaEl = document.getElementById("meta");
+      const plantIdEl = document.getElementById("plant-id");
+      const imgEl = document.getElementById("image");
 
-      const id = safe(getParam("id")).toLowerCase();
-      if (!id){
-        statusEl.innerHTML = `Erreur : paramètre <code>?id=</code> manquant. Exemple : <code>description.html?id=plt-0001</code>`;
+      if (!id) {
+        statusEl.innerHTML =
+          'Erreur : paramètre <code>?id=</code> manquant. Exemple : <code>description.html?id=plt-0001</code>';
         return;
       }
 
-      const url = `/data/plants/${encodeURIComponent(id)}.json`;
-      let plant;
+      plantIdEl.textContent = `ID : ${id}`;
 
-      try{
-        const res = await fetch(url, { cache:"no-store" });
+      let plant;
+      const url = `/data/${encodeURIComponent(id)}.json`;
+
+      try {
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("Fichier plante introuvable");
         plant = await res.json();
-      } catch(e){
+      } catch (e) {
         console.error(e);
-        statusEl.innerHTML = `Erreur : impossible de charger <code>${url}</code>`;
+        statusEl.innerHTML =
+          `Erreur : impossible de charger <code>${url}</code><br>` +
+          `Vérifie que le fichier existe dans GitHub : <code>data/${id}.json</code>`;
         return;
       }
 
-      const LANG = getLangFromPath();
-      const nomSci = safe(plant.nom_scientifique) || id;
+      const nomSci = safe(plant.nom_scientifique);
+      const nomFr = safe(plant.nom_francais);
+      const nomCreole = safe(plant.nom_creole);
+      const nomAnglais = safe(plant.nom_anglais);
+      const famille = safe(plant.famille_fr);
 
-      const nomLocal =
-        LANG === "en" ? safe(plant.nom_anglais) :
-        LANG === "ht" ? safe(plant.nom_creole) :
-        safe(plant.nom_francais);
+      titleEl.textContent = nomSci || id;
 
-      // Choisir les champs de description selon la langue
-      const desc =
-        LANG === "en" ? safe(plant.description_en || plant.description_fr) :
-        LANG === "ht" ? safe(plant.description_ht || plant.description_fr) :
-        safe(plant.description_fr);
+      subtitleEl.textContent = [
+        nomFr ? `Nom français : ${nomFr}` : "",
+        nomCreole ? `Créole : ${nomCreole}` : "",
+        nomAnglais ? `English : ${nomAnglais}` : ""
+      ].filter(Boolean).join(" • ");
 
-      const botanique =
-        LANG === "en" ? safe(plant.botanique_en || "") :
-        LANG === "ht" ? safe(plant.botanique_ht || "") :
-        safe(plant.botanique_fr || "");
-
-      const ecologie =
-        LANG === "en" ? safe(plant.ecologie_en || "") :
-        LANG === "ht" ? safe(plant.ecologie_ht || "") :
-        safe(plant.ecologie_fr || "");
-
-      const usages =
-        LANG === "en" ? safe(plant.usages_en || "") :
-        LANG === "ht" ? safe(plant.usages_ht || "") :
-        safe(plant.usages_fr || "");
-
-      titleEl.textContent = nomSci;
-      subtitleEl.textContent = [nomLocal ? `Nom : ${nomLocal}` : "", `ID : ${id}`].filter(Boolean).join(" • ");
-
-      let html = "";
-
-      if (desc){
-        html += `<div class="section"><h2>Description (paragraphes)</h2>${toParagraphs(desc)}</div>`;
+      const lienImage = safe(plant.lien_image || plant.image || "");
+      if (lienImage && (isHttpUrl(lienImage) || lienImage.startsWith("/"))) {
+        imgEl.src = lienImage;
+        imgEl.style.display = "block";
       }
 
-      if (botanique){
-        html += `<div class="section"><h2>Description botanique</h2>${toParagraphs(botanique)}</div>`;
-      }
+      metaEl.innerHTML = `
+        ${famille ? `<p><strong>Famille :</strong> ${famille}</p>` : ""}
+        ${safe(plant.genre) ? `<p><strong>Genre :</strong> ${safe(plant.genre)}</p>` : ""}
+        ${safe(plant.espece) ? `<p><strong>Espèce :</strong> ${safe(plant.espece)}</p>` : ""}
+        ${safe(plant.forme) ? `<p><strong>Forme :</strong> ${safe(plant.forme)}</p>` : ""}
+        ${safe(plant.statut_origine) ? `<p><strong>Statut :</strong> ${safe(plant.statut_origine)}</p>` : ""}
+      `;
 
-      if (ecologie){
-        html += `<div class="section"><h2>Écologie & habitat</h2>${toParagraphs(ecologie)}</div>`;
-      }
+      const html = [
+        section("Description générale", plant.description_fr),
+        section("Description botanique", plant.botanique_fr),
+        section("Écologie et habitat", plant.ecologie_fr),
+        section("Usages et préparation", plant.usages_fr),
+        section("Observations complémentaires", plant.notes_fr)
+      ].join("");
 
-      if (usages){
-        html += `<div class="section"><h2>Usages & préparation</h2>${toParagraphs(usages)}</div>`;
-      }
+      contentEl.innerHTML = html || `<p class="muted">Aucune description détaillée n’est encore disponible pour cette plante.</p>`;
 
-      if (!html){
-        html = `<div class="muted">Aucune description en paragraphes n’est encore disponible pour cette plante.</div>`;
-      }
-
-      // Afficher
       statusEl.style.display = "none";
       titleEl.style.display = "block";
       subtitleEl.style.display = "block";
+      metaEl.style.display = "block";
       contentEl.style.display = "block";
-      contentEl.innerHTML = html;
     })();
   </script>
 </body>
